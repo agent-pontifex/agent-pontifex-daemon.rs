@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.agent-pontifex.daemon</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/agent-pontifex-daemon</string>
+  </array>
+
+  <!-- launchd restarts on non-zero exit. The daemon exits non-zero only for
+       conditions a restart can plausibly fix; a config error exits non-zero
+       once and is expected to be corrected by an operator, not retried forever. -->
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+
+  <!-- Must exceed shutdown-grace-seconds, or launchd SIGKILLs an active drain. -->
+  <key>ExitTimeOut</key>
+  <integer>45</integer>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>/usr/local/var/log/agent-pontifex-daemon.log</string>
+  <key>StandardErrorPath</key>
+  <string>/usr/local/var/log/agent-pontifex-daemon.err.log</string>
+</dict>
+</plist>

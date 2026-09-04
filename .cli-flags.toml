@@ -1,0 +1,57 @@
+# Public command and flag contract for agent-pontifex-daemon.
+#
+# This file is the SINGLE authority for commands, option aliases, types,
+# defaults, environment keys, help text and precedence. It is parsed at the argv
+# boundary by flags-2-env (github.com/flags-2-env/flags-2-env). Clap or any
+# similar library may project already-resolved values into application types,
+# but must never become a second option schema.
+#
+# Credentials are deliberately absent: argv is visible in process listings and
+# shell history. Secrets come from the environment/secret store only.
+
+[meta]
+name = "agent-pontifex-daemon"
+version = "0.1.0"
+description = "Agent Pontifex cross-platform background daemon"
+
+[[options]]
+name = "coordinator-url"
+env = "AGENT_PONTIFEX_COORDINATOR_URL"
+type = "string"
+required = true
+help = "Absolute http(s) URL of the Agent Pontifex coordinator."
+
+[[options]]
+name = "worker-id"
+env = "AGENT_PONTIFEX_WORKER_ID"
+type = "string"
+required = true
+help = "Stable identity for this worker. Must be unique per running daemon."
+
+[[options]]
+name = "lease-seconds"
+env = "AGENT_PONTIFEX_LEASE_SECONDS"
+type = "integer"
+default = 120
+help = "Job lease duration requested from the coordinator."
+
+[[options]]
+name = "heartbeat-seconds"
+env = "AGENT_PONTIFEX_HEARTBEAT_SECONDS"
+type = "integer"
+default = 40
+help = "Lease renewal interval. MUST be strictly less than lease-seconds; a third of the lease leaves room for one lost renewal."
+
+[[options]]
+name = "shutdown-grace-seconds"
+env = "AGENT_PONTIFEX_SHUTDOWN_GRACE_SECONDS"
+type = "integer"
+default = 30
+help = "How long to drain in-flight work after leaving readiness before forcing stop."
+
+[[options]]
+name = "foreground"
+env = "AGENT_PONTIFEX_FOREGROUND"
+type = "boolean"
+default = false
+help = "Run in the foreground even when a service manager is detected."

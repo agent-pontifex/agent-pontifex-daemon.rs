@@ -1,0 +1,31 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      # fmt runs first and gates everything after it. Keep it first so a
+      # formatting drift is reported as formatting, not as a mystery build failure.
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo build --locked --all-targets
+      - run: cargo test --locked
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: systemd unit is well-formed
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y systemd
+          systemd-analyze verify packaging/systemd/agent-pontifex-daemon.service
+      - name: launchd plist is well-formed
+        run: python3 -c "import plistlib,sys; plistlib.load(open('packaging/launchd/com.agent-pontifex.daemon.plist','rb')); print('plist ok')"

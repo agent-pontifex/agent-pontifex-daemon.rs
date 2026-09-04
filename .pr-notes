@@ -1,0 +1,21 @@
+**Shutdown contract (DEN-3175).** `SIGTERM` leaves readiness *first*, then drains. Draining
+before deregistering means new work keeps arriving into a process that is trying to leave.
+`Stopped` records why — `Drained` vs `GraceExpired` — because a log that only says "stopped"
+cannot tell a clean drain from a timeout.
+
+**Invariants pinned by tests, not just happy paths:** readiness cannot be regained while
+draining; repeated `SIGTERM` does not shorten the grace period; `SIGTERM` during startup is
+not lost.
+
+**Lease safety.** `heartbeat_interval` must be strictly less than `lease_duration`, enforced
+at startup — a config failure is a startup failure, never a silent default. Default is a
+third of the lease so one dropped renewal is survivable.
+
+**Three managers, one constraint.** `TimeoutStopSec` (systemd), `ExitTimeOut` (launchd) and
+`WaitToKillServiceTimeout` (Windows SCM) must all exceed `shutdown-grace-seconds`, or an
+active drain is killed mid-job.
+
+**No credentials as flags** — argv is visible in process listings. `.cli-flags.toml` is the
+only option schema, parsed by flags-2-env.
+
+Verified: `cargo fmt --check` · `cargo clippy --all-targets -D warnings` · 9/9 tests pass.

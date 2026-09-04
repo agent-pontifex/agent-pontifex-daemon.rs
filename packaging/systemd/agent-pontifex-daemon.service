@@ -1,0 +1,40 @@
+[Unit]
+Description=Agent Pontifex daemon
+Documentation=https://github.com/agent-pontifex/agent-pontifex-daemon.rs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+ExecStart=/usr/local/bin/agent-pontifex-daemon
+Restart=on-failure
+RestartSec=5s
+
+# Drain contract (DEN-3175): SIGTERM leaves readiness first, then drains.
+# Keep TimeoutStopSec strictly greater than shutdown-grace-seconds so the daemon
+# finishes its own drain rather than being SIGKILLed mid-job.
+KillSignal=SIGTERM
+TimeoutStopSec=45s
+
+# Credentials arrive via the environment/secret store, never argv.
+EnvironmentFile=-/etc/agent-pontifex/daemon.env
+
+# Least privilege.
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
