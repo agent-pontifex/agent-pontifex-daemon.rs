@@ -1,0 +1,15 @@
+[package]
+name = "agent-pontifex-daemon"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Cross-platform Agent Pontifex background daemon (systemd, launchd, Windows services)."
+
+# Intentionally dependency-free at this layer. The lifecycle and configuration
+# contracts are pure std so they can be property-tested and formally reviewed
+# without pulling a runtime. Transport, serde and the async runtime arrive in the
+# adapter layer, resolved through zed-pkg.
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
